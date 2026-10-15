@@ -1,6 +1,6 @@
 # 最小 Python 邮件助手
 
-兼容 Python 3.10。读取 `data/emails.json` 中五封虚构英文邮件，输出分类、岗位匹配理由、待办与截止日期，以及需要回复时的英文草稿。没有个人履历，岗位匹配标为“未知”；不适用的字段标为“不适用”。不连接邮箱、不发送邮件。
+兼容 Python 3.10。读取 `data/emails.json` 中五封虚构英文邮件，输出优先级（`high`、`medium` 或 `low`）、分类、岗位匹配理由、待办与截止日期，以及需要回复时的英文草稿。信息不足时优先级为 `medium`，不编造理由。没有个人履历，岗位匹配标为“未知”；不适用的字段标为“不适用”。不连接邮箱、不发送邮件。
 
 ## 安装和 mock 运行
 
@@ -8,7 +8,7 @@
 python3.10 -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.txt
-python src/email_assistant.py --mock
+python main.py --mock
 python -m unittest discover -s tests -v
 ```
 
@@ -39,7 +39,8 @@ python src/email_assistant.py
 
 ## 项目结构
 
-- `src/email_assistant.py`：CLI、数据模型、API 调用、校验与 JSON/Markdown 输出。
+- `main.py`：项目 CLI 入口。
+- `src/email_assistant.py`：数据模型、API 调用、校验与 JSON/Markdown 输出。
 - `data/emails.json`：五封虚构英文邮件；`mock_results.json`：固定离线答案；`data_profile.md`：数据说明。
 - `tests/test_email_assistant.py`：离线流程与 API 调用边界测试，全部无需真实密钥。
 - `requirements.txt`、`.env.example`、`.gitignore`：依赖、变量示例和忽略规则。

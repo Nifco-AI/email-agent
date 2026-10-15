@@ -29,8 +29,11 @@ class EmailAssistantTests(unittest.TestCase):
             self.assertEqual(len(report["emails"]), 5)
             self.assertEqual(len({item["category"] for item in report["emails"]}), 5)
             self.assertEqual(report["emails"][0]["job_match"], "未知")
+            self.assertEqual([item["priority"] for item in report["emails"]],
+                             ["medium", "high", "high", "low", "low"])
             self.assertEqual(report["emails"][2]["todos"][0]["deadline"], "未知")
             self.assertIn("2026-10-20 17:00 Singapore time", markdown)
+            self.assertIn("优先级：high", markdown)
             for item in report["emails"][3:]:
                 self.assertEqual(item["todos"], [])
                 self.assertEqual(item["reply_needed"], "no")
@@ -73,6 +76,17 @@ class EmailAssistantTests(unittest.TestCase):
         self.batch.emails.pop()
         with self.assertRaises(ValueError):
             app.validate_results(self.batch, self.emails)
+
+    def test_priority_defaults_to_medium(self):
+        payload = self.batch.emails[0].model_dump()
+        payload.pop("priority")
+        self.assertEqual(app.EmailAnalysis.model_validate(payload).priority, "medium")
+
+    def test_priority_is_constrained(self):
+        payload = self.batch.emails[0].model_dump()
+        payload["priority"] = "urgent"
+        with self.assertRaises(ValueError):
+            app.EmailAnalysis.model_validate(payload)
 
     def test_markdown_escapes_active_content(self):
         text = app.markdown_text('<script>alert(1)</script> [click](https://example.com)')

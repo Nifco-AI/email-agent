@@ -24,6 +24,8 @@ events. Preserve explicit deadlines; ambiguous or absent deadlines are 未知.
 reply_needed is yes/no/unknown; unknown gets draft 未知, no gets 不适用.
 For yes, write a cautious English draft without inventing commitments or answers;
 ask for clarification when needed. List material missing facts in unknowns.
+Set priority to high, medium, or low based only on the email's explicit content;
+use medium when the information is insufficient, without inventing a reason.
 """
 
 
@@ -34,6 +36,7 @@ class Todo(BaseModel):
 
 class EmailAnalysis(BaseModel):
     email_id: str
+    priority: Literal["high", "medium", "low"] = "medium"
     category: Literal["招聘机会", "会议待办", "老板请求", "广告", "普通通知", "未知"]
     job_match: Literal["匹配", "不匹配", "未知", "不适用"]
     job_match_reasons: list[str]
@@ -101,7 +104,8 @@ def render_markdown(batch: AnalysisBatch, emails: list[dict], mode: str) -> str:
     lines = ["# 邮件分析", "", f"模式：{mode}。所有草稿仅供人工审核，未发送。", ""]
     for email, item in zip(emails, batch.emails):
         lines += [f"## {item.email_id} — {markdown_text(email['subject'])}", "",
-                  f"分类：{item.category}", "", f"工作机会匹配：{item.job_match}", ""]
+                  f"优先级：{item.priority}", "", f"分类：{item.category}", "",
+                  f"工作机会匹配：{item.job_match}", ""]
         lines += [f"- {markdown_text(reason)}" for reason in item.job_match_reasons]
         lines += ["", "### 待办与截止日期", ""]
         lines += [f"- {markdown_text(todo.task)}；截止日期：{markdown_text(todo.deadline)}"
